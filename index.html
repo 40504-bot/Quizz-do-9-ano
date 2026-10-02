@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gonçalo Maths&Informática - Jogo da Matemática 9º Ano</title>
+    <!-- Tipografia moderna e limpa (Inter e Fira Code) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(17, 24, 39, 0.85);
+            --border-color: #1e293b;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --secondary-accent: #c084fc;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Fundo Matemático Animado e Dinâmico */
+        .math-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            opacity: 0.15;
+        }
+
+        .math-symbol {
+            position: absolute;
+            color: var(--accent);
+            font-family: 'Fira Code', monospace;
+            font-weight: 600;
+            animation: floatSymbol linear infinite;
+        }
+
+        @keyframes floatSymbol {
+            0% {
+                transform: translateY(-80px) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            15% { opacity: 1; scale: 1; }
+            85% { opacity: 1; }
+            100% {
+                transform: translateY(105vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Contentor Principal com Efeito Glassmorphism Avançado */
+        .container {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 24px;
+            width: 92%;
+            max-width: 780px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-glow);
+            z-index: 10;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--secondary-accent));
+        }
+
+        .site-brand {
+            text-align: center;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--secondary-accent);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            color: var(--text-main);
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        h2 {
+            color: var(--accent);
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+        }
+
+        /* Sistema de Botões */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+            color: #0b0f19;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text-main);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Ecrãs (Visibilidade) */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .review-box, .rules-modal-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent);
+            padding: 22px;
+            margin-bottom: 20px;
+            border-radius: 0 14px 14px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .review-box h3, .rules-modal-box h3 {
+            color: var(--text-main);
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .math-formula {
+            font-family: 'Fira Code', monospace;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        /* Janela Modal de Regras (Efeito de Giro/Zoom) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            width: 85%;
+            max-width: 650px;
+            padding: 35px;
+            box-shadow: 0 25px 60px rgba(56, 189, 248, 0.3);
+            transform: scale(0.5) rotate(-10deg);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: scale(1) rotate(0deg);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid var(--error);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--error);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* Componentes do Quiz */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .option-btn {
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 16px 22px;
+            border-radius: 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent);
+            transform: translateX(6px);
+        }
+
+        .option-btn.correct {
+            background: rgba(34, 197, 94, 0.25) !important;
+            border-color: var(--success) !important;
+            color: #86efac;
+        }
+
+        .option-btn.wrong {
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-color: var(--error) !important;
+            color: #fca5a5;
+        }
+
+        /* Ecrã de Resultados */
+        .result-card {
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        .score-badge {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 15px 0;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .feedback-msg {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fundo Matemático Dinâmico Animado -->
+    <div class="math-bg" id="mathBg"></div>
+
+    <!-- JANELA MODAL DE REGRAS (Efeito de Giro/Zoom espetacular) -->
+    <div class="modal-overlay" id="rulesModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleRulesModal()">×</button>
+            <h2 style="color: var(--secondary-accent); margin-bottom: 20px;">📜 Regulamento Oficial do Jogo</h2>
+            
+            <div class="rules-modal-box">
+                <h3><span>🎯</span> Objetivo do Jogo</h3>
+                <p>Responder corretamente a um conjunto de 8 questões abrangendo Potências, Notação Científica e os Conjuntos Numéricos (<span class="math-formula">ℕ</span>, <span class="math-formula">ℤ</span>, <span class="math-formula">ℚ</span>, <span class="math-formula">ℝ</span>).</p>
+            </div>
+
+            <div class="rules-modal-box">
+                <h3><span>⚖️</span> Regra Crítica de Tentativas</h3>
+                <p>• <strong>Menos de 30% (< 30%):</strong> Se obtiveres uma pontuação inferior a 30%, o sistema concede automaticamente o direito a uma <strong>2ª e última oportunidade</strong> para melhorar a nota.</p>
+                <p>• <strong>30% ou Mais (≥ 30%):</strong> Se obtiveres 30% ou mais mas não alcançares a perfeição (100%), as regras ditam que <strong>perdes o desafio e não podes jogar novamente</strong> nesta ronda.</p>
+            </div>
+
+            <button class="btn" style="width: 100%; margin-top: 15px;" onclick="toggleRulesModal()">Entendido, Vamos Jogar!</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- ECRÃ 1: REVISÃO DE POTÊNCIAS -->
+        <div id="screen-review-pot" class="screen active">
+            <div class="site-brand">Gonçalo Maths & Informática</div>
+            <h1>Jogo da Matemática 9º Ano</h1>
+            <h2>Revisão 1: Potências</h2>
+            <p>Antes de iniciar o desafio sobre os conjuntos numéricos, vamos consolidar as propriedades fundamentais das potências:</p>
+            
+            <div class="review-box">
+                <h3><span>💡</span> O Conceito de Potência</h3>
+                <p>Uma potência representa uma abreviatura para produtos de fatores iguais. Por exemplo: <span class="math-formula">2³ = 2 × 2 × 2 = 8</span>.</p>
+                <p>O número inferior designa-se por <strong>base</strong>, o superior por <strong>expoente</strong> e o resultado por <strong>potência</strong>.</p>
+            </div>
+
+            <div class="review-box">
+                <h3><span>⚙️</span> Propriedades Operatórias Essenciais</h3>
+                <p>• <strong>Multiplicação de bases iguais:</strong> <span class="math-formula">aᵐ × aⁿ = aᵐ⁺ⁿ</span> (mantém a base e adiciona os expoentes).</p>
+                <p>• <strong>Divisão de bases iguais:</strong> <span class="math-formula">aᵐ ÷ aⁿ = aᵐ⁻ⁿ</span> (mantém a base e subtrai os expoentes).</p>
+                <p>• <strong>Expoente Zero:</strong> <span class="math-formula">a⁰ = 1</span> (qualquer número real não nulo elevado a zero é igual a um).</p>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="toggleRulesModal()">Ver Regras do Jogo</button>
+                <button class="btn" onclick="nextScreen('screen-review-not')">Avançar para Notação Científica</button>
+            </div>
+        </div>
+
+        <!-- ECRÃ 2: REVISÃO DE NOTAÇÃO CIENTÍFICA -->
+        <div id="screen-review-not" class="screen">
+            <div class="site-brand">Gonçalo Maths & Informática</div>
+            <h1>Jogo da Matemática 9º Ano</h1>
+            <h2>Revisão 2: Notação Científica</h2>
+            <p>Aprenda a representar valores extremamente grandes ou excessivamente pequenos com eficiência matemática:</p>
+
+            <div class="review-box">
+                <h3><span>📐</span> Estrutura Padrão</h3>
+                <p>Qualquer número real escreve-se sob a forma: <span class="math-formula">a × 10ⁿ</span></p>
+                <p>Sendo que o coeficiente satisfaz a condição <span class="math-formula">1 ≤ |a| < 10</span> e o expoente <em>n</em> é um número inteiro (<span class="math-formula">ℤ</span>).</p>
+            </div>
+
+            <div class="review-box">
+                <h3><span>🔍</span> Exemplos Práticos</h3>
+                <p>• <strong>Grande escala:</strong> <span class="math-formula">4 500 000 = 4,5 × 10⁶</span> (deslocamento da vírgula 6 posições para a esquerda).</p>
+                <p>• <strong>Micro escala:</strong> <span class="math-formula">0,00032 = 3,2 × 10⁻⁴</span> (deslocamento da vírgula 4 posições para a direita).</p>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="toggleRulesModal()">Ver Regras do Jogo</button>
+                <button class="btn" onclick="nextScreen('screen-quiz')">Iniciar o Teste de Avaliação</button>
+            </div>
+        </div>
+
+        <!-- ECRÃ 3: O QUIZ / JOGO -->
+        <div id="screen-quiz" class="screen">
+            <div class="site-brand">Gonçalo Maths & Informática</div>
+            <div class="quiz-header">
+                <span id="quiz-progress">Questão 1 de 8</span>
+                <span id="quiz-score-live">Pontuação: 0</span>
+            </div>
+            <div id="quiz-container">
+                <!-- Preenchido via JavaScript -->
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <button class="btn btn-secondary" style="padding: 10px 18px; font-size: 0.9rem;" onclick="toggleRulesModal()">Regras</button>
+                <button id="next-question-btn" class="btn" style="display:none; margin: 0;" onclick="handleNextQuestion()">Seguinte</button>
+            </div>
+        </div>
+
+        <!-- ECRÃ 4: RESULTADOS E REGRAS DE TENTATIVA -->
+        <div id="screen-result" class="screen">
+            <div class="site-brand">Gonçalo Maths & Informática</div>
+            <h1>Avaliação Final</h1>
+            <div class="result-card">
+                <div class="score-badge" id="score-percentage">0%</div>
+                <div class="feedback-msg" id="result-message"></div>
+                <p id="score-details" style="color: var(--text-muted); margin-bottom: 25px;"></p>
+                <div id="action-container" class="btn-group"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- GERAR FUNDO MATEMÁTICO LIMPO E ANIMADO ---
+        const symbols = ['\u2211', '\u222b', '\u03c0', '\u221a', 'x²', 'y³', '\u2208', '\u211d', '\u2124', '\u2115', '\u211a', '10ⁿ', '+', '-', '×', '÷', '∞'];
+        const mathBg = document.getElementById('mathBg');
+
+        for (let i = 0; i < 32; i++) {
+            const span = document.createElement('div');
+            span.classList.add('math-symbol');
+            span.style.left = Math.random() * 100 + 'vw';
+            span.style.top = (Math.random() * -100) + 'px';
+            span.style.fontSize = (Math.random() * 18 + 14) + 'px';
+            span.style.animationDuration = (Math.random() * 8 + 6) + 's';
+            span.style.animationDelay = (Math.random() * 5) + 's';
+            span.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+            mathBg.appendChild(span);
+        }
+
+        // --- CONTROLO DA JANELA MODAL DE REGRAS (Efeito de Giro/Zoom) ---
+        function toggleRulesModal() {
+            const modal = document.getElementById('rulesModal');
+            modal.classList.toggle('open');
+        }
+
+        // --- GESTÃO DE ECRÃS ---
+        function nextScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if(screenId === 'screen-quiz') {
+                startQuiz();
+            }
+        }
+
+        // --- BASE DE DADOS DO QUIZ ---
+        const questions = [
+            {
+                question: "Qual dos seguintes números pertence estritamente ao conjunto dos Números Naturais (ℕ)?",
+                options: ["-5", "0", "3/4", "12"],
+                answer: 3
+            },
+            {
+                question: "Qual é o resultado simplificado da operação de potências: 2³ × 2²?",
+                options: ["2⁵", "4⁶", "2⁶", "4⁵"],
+                answer: 0
+            },
+            {
+                question: "Indique o número que pertence ao conjunto dos Inteiros (ℤ) mas NÃO pertence aos Naturais (ℕ):",
+                options: ["7", "0", "-4", "2.5"],
+                answer: 2
+            },
+            {
+                question: "Qual é a representação correta do número 54 000 em Notação Científica?",
+                options: ["54 × 10³", "5,4 × 10⁴", "5,4 × 10⁻⁴", "0,54 × 10⁵"],
+                answer: 1
+            },
+            {
+                question: "Uma dízima periódica ou uma fração irredutível negativa integram qual conjunto numérico?",
+                options: ["Apenas Naturais (ℕ)", "Apenas Inteiros (ℤ)", "Números Racionais (ℚ)", "Números Irracionais"],
+                answer: 2
+            },
+            {
+                question: "Qual é o valor numérico correspondente à potência de base negativa: (-3)²?",
+                options: ["-9", "9", "-6", "6"],
+                answer: 1
+            },
+            {
+                question: "Qual das opções representa o número decimal 0,00082 em notação científica?",
+                options: ["8,2 × 10⁻⁴", "82 × 10⁻⁵", "8,2 × 10⁴", "0,82 × 10⁻³"],
+                answer: 0
+            },
+            {
+                question: "O conjunto dos Números Reais (ℝ) engloba qual das seguintes combinações?",
+                options: ["Apenas números racionais", "Apenas números inteiros e naturais", "Números racionais e irracionais", "Exclusivamente potências de base 10"],
+                answer: 2
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let attemptsCount = 1; // Controlo de tentativas
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestionIndex];
+            const container = document.getElementById('quiz-container');
+            document.getElementById('next-question-btn').style.display = 'none';
+            document.getElementById('quiz-progress').innerText = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
+            document.getElementById('quiz-score-live').innerText = `Pontuação: ${score}`;
+
+            let html = `
+                <div class="question-text">${q.question}</div>
+                <div class="options">
+            `;
+
+            q.options.forEach((opt, idx) => {
+                html += `<button class="option-btn" onclick="selectOption(${idx})">${opt}</button>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function selectOption(selectedIndex) {
+            const q = questions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === q.answer) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIndex) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            if (selectedIndex === q.answer) {
+                score++;
+                document.getElementById('quiz-score-live').innerText = `Pontuação: ${score}`;
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                document.getElementById('next-question-btn').style.display = 'block';
+            } else {
+                setTimeout(showResults, 800);
+            }
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function showResults() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-result').classList.add('active');
+
+            const percentage = (score / questions.length) * 100;
+            const resultMsg = document.getElementById('result-message');
+            const scoreBadge = document.getElementById('score-percentage');
+            const scoreDetails = document.getElementById('score-details');
+            const actionContainer = document.getElementById('action-container');
+
+            scoreBadge.innerText = `${percentage.toFixed(0)}%`;
+            scoreDetails.innerText = `Acertou ${score} em ${questions.length} questões propostas.`;
+
+            // REGRAS DE TENTATIVAS ESTABELECIDAS:
+            // - Menos de 30% tem direito a uma segunda tentativa.
+            // - Quem tirar mais de 30% mas perder não joga mais.
+            if (percentage < 30) {
+                if (attemptsCount === 1) {
+                    resultMsg.innerHTML = "⚠️️ <strong>Atenção:</strong> Obteve uma pontuação inferior a 30%.";
+                    resultMsg.style.color = "var(--warning)";
+                    actionContainer.innerHTML = `
+                        <p style="width: 100%; text-align: center; color: var(--text-muted);">Como o resultado foi inferior a 30%, tem direito a uma <strong>segunda e última tentativa</strong> para melhorar a sua avaliação!</p>
+                        <button class="btn" onclick="retryGame()">Tentar Novamente (2ª Tentativa)</button>
+                    `;
+                } else {
+                    resultMsg.innerHTML = "❌ <strong>Tentativa esgotada.</strong> Não atingiu a pontuação mínima exigida.";
+                    resultMsg.style.color = "var(--error)";
+                    actionContainer.innerHTML = `<p style="width: 100%; text-align: center; color: var(--text-muted);">Recomendamos uma nova leitura das secções de revisão teórica.</p>`;
+                }
+            } else {
+                if (percentage === 100) {
+                    resultMsg.innerHTML = "🏆 <strong>Excelente!</strong> Demonstrou domínio absoluto da matéria!";
+                    resultMsg.style.color = "var(--success)";
+                    actionContainer.innerHTML = `<p style="width: 100%; text-align: center; color: var(--text-muted);">Concluiu com sucesso o desafio sobre números e potências.</p>`;
+                } else {
+                    resultMsg.innerHTML = "👍 <strong>Bom trabalho!</strong> Ultrapassou o limiar de 30%.";
+                    resultMsg.style.color = "var(--accent)";
+                    actionContainer.innerHTML = `<p style="width: 100%; text-align: center; color: var(--text-muted);">De acordo com as regras do desafio, quem obtém 30% ou mais e não atinge a pontuação máxima <strong>não repete o jogo</strong>. Parabéns!</p>`;
+                }
+            }
+        }
+
+        function retryGame() {
+            attemptsCount++;
+            nextScreen('screen-quiz');
+        }
+    </script>
+</body>
+</html>
